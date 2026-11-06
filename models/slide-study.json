@@ -1,0 +1,75 @@
+{
+  "id": "slide-study",
+  "title": "크로매틱 형상 시제품",
+  "family": "chromatic",
+  "fixture": true,
+  "manufacturer": null,
+  "product": null,
+  "key": null,
+  "tuning": null,
+  "geometry": {
+    "width": 7.3,
+    "height": 1.17,
+    "depth": 1.85,
+    "mouthpieceZ": 0,
+    "hasSlide": true,
+    "cover": "flat",
+    "unit": "scene"
+  },
+  "holes": [
+    {"id": "hole-a", "x": -2.92, "y": 0, "width": 0.5, "height": 0.55, "shape": "round"},
+    {"id": "hole-b", "x": -2.19, "y": 0, "width": 0.5, "height": 0.55, "shape": "round"},
+    {"id": "hole-c", "x": -1.46, "y": 0, "width": 0.5, "height": 0.55, "shape": "round"},
+    {"id": "hole-d", "x": -0.73, "y": 0, "width": 0.5, "height": 0.55, "shape": "round"},
+    {"id": "hole-e", "x": 0.0, "y": 0, "width": 0.5, "height": 0.55, "shape": "round"},
+    {"id": "hole-f", "x": 0.73, "y": 0, "width": 0.5, "height": 0.55, "shape": "round"},
+    {"id": "hole-g", "x": 1.46, "y": 0, "width": 0.5, "height": 0.55, "shape": "round"},
+    {"id": "hole-h", "x": 2.19, "y": 0, "width": 0.5, "height": 0.55, "shape": "round"},
+    {"id": "hole-i", "x": 2.92, "y": 0, "width": 0.5, "height": 0.55, "shape": "round"}
+  ],
+  "positions": [
+    {"id": "demo-a", "label": "관찰 위치 A", "physicalHoleIds": ["hole-a"], "contact": [-2.92, 0, 0]},
+    {"id": "demo-b", "label": "관찰 위치 B", "physicalHoleIds": ["hole-b"], "contact": [-2.19, 0, 0]},
+    {"id": "demo-c", "label": "관찰 위치 C", "physicalHoleIds": ["hole-c"], "contact": [-1.46, 0, 0]},
+    {"id": "demo-d", "label": "관찰 위치 D", "physicalHoleIds": ["hole-d"], "contact": [-0.73, 0, 0]},
+    {"id": "demo-e", "label": "관찰 위치 E", "physicalHoleIds": ["hole-e"], "contact": [0.0, 0, 0]},
+    {"id": "demo-f", "label": "관찰 위치 F", "physicalHoleIds": ["hole-f"], "contact": [0.73, 0, 0]},
+    {"id": "demo-g", "label": "관찰 위치 G", "physicalHoleIds": ["hole-g"], "contact": [1.46, 0, 0]},
+    {"id": "demo-h", "label": "관찰 위치 H", "physicalHoleIds": ["hole-h"], "contact": [2.19, 0, 0]},
+    {"id": "demo-i", "label": "관찰 위치 I", "physicalHoleIds": ["hole-i"], "contact": [2.92, 0, 0]}
+  ],
+  "orientation": {
+    "up": [
+      0,
+      1,
+      0
+    ],
+    "mouthpieceNormal": [
+      0,
+      0,
+      1
+    ],
+    "viewConvention": "player",
+    "numberingRule": null
+  },
+  "mechanisms": [
+    {
+      "id": "slide",
+      "requiredForPitch": true,
+      "states": [
+        "released",
+        "engaged"
+      ]
+    }
+  ],
+  "noteMappings": [],
+  "verification": {
+    "geometry": "provisional",
+    "noteMapping": "unspecified",
+    "notation": "unspecified",
+    "contactModel": "provisional"
+  },
+  "verificationEvidence": {},
+  "evidence": [],
+  "defaultPositionId": "demo-e"
+}

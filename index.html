@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f5f6fa">
+  <title>하모니카 3D · 계이름 배우기</title>
+  <meta name="description" content="3D 장면을 돌려 입술과 하모니카 취구의 관계를 살펴보는 학습 도구">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='11' fill='%234c3acf'/%3E%3Crect x='7' y='13' width='26' height='14' rx='4' fill='none' stroke='white' stroke-width='2'/%3E%3Cpath d='M13 17v6m5-6v6m4-6v6m5-6v6' stroke='white' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="./styles.css">
+  <script type="module" src="./app.mjs"></script>
+</head>
+<body>
+  <svg class="icon-library" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <symbol id="icon-harp" viewBox="0 0 24 24"><rect x="2.5" y="6.5" width="19" height="11" rx="3"/><path d="M7 10v4m3.4-4v4m3.2-4v4m3.4-4v4"/></symbol>
+    <symbol id="icon-cube" viewBox="0 0 24 24"><path d="m12 2.5 8 4.7v9.6l-8 4.7-8-4.7V7.2l8-4.7Z M4 7.2l8 4.7 8-4.7m-8 4.7v9.6"/></symbol>
+    <symbol id="icon-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5m0-8h.01"/></symbol>
+    <symbol id="icon-view" viewBox="0 0 24 24"><path d="M2.4 12s3.5-6.4 9.6-6.4 9.6 6.4 9.6 6.4-3.5 6.4-9.6 6.4S2.4 12 2.4 12Z"/><circle cx="12" cy="12" r="2.6"/></symbol>
+    <symbol id="icon-drag" viewBox="0 0 24 24"><path d="M12 3v18M3 12h18M9 6l3-3 3 3m-6 12 3 3 3-3m3-9 3 3-3 3M6 9l-3 3 3 3"/></symbol>
+    <symbol id="icon-breath" viewBox="0 0 24 24"><path d="M3 8h12a2.5 2.5 0 1 0-2.5-2.5M3 12h16a2.5 2.5 0 1 1-2.5 2.5M3 16h8a2.5 2.5 0 1 1-2.5 2.5"/></symbol>
+    <symbol id="icon-chevron" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
+    <symbol id="icon-note" viewBox="0 0 24 24"><path d="M10 18V5l10-2v13M10 18a3 2 0 1 1-3-2c1.7 0 3 .9 3 2Zm10-2a3 2 0 1 1-3-2c1.7 0 3 .9 3 2Z"/></symbol>
+  </svg>
+  <a class="skip" href="#viewer-heading">3D 관찰 장면으로 이동</a>
+  <header class="topbar">
+    <div class="shell topbar-inner">
+      <a class="brand" href="./" aria-label="하모니카 3D 첫 화면">
+        <span class="brand-mark"><svg class="icon" aria-hidden="true"><use href="#icon-harp"/></svg></span>
+        <span>하모니카 <strong>3D</strong><small>계이름 배우기</small></span>
+      </a>
+      <a class="help-link" href="#guide"><svg class="icon" aria-hidden="true"><use href="#icon-info"/></svg>사용 안내</a>
+    </div>
+  </header>
+  <main id="app" class="shell" data-model="" data-load="idle" data-view="free">
+    <header class="intro">
+      <div class="intro-copy">
+        <div class="eyebrow"><span></span> 3D 하모니카 학습실</div>
+        <h1>입술과 취구 살펴보기</h1>
+        <p>하모니카를 돌려 입술이 닿는 위치를 보고, 날숨과 들숨의 차이를 익혀요.</p>
+      </div>
+      <span class="status-chip"><span></span> 시각·조작 시제품</span>
+    </header>
+    <section class="instrument-strip" aria-labelledby="instrument-heading">
+      <div class="instrument-label"><h2 id="instrument-heading">악기 종류</h2><span>형상 비교</span></div>
+      <div id="categories" class="categories" role="group" aria-label="악기 종류">
+        <button type="button" data-category="diatonic" aria-pressed="true">다이아토닉</button>
+        <button type="button" data-category="chromatic" aria-pressed="false">크로매틱</button>
+        <button type="button" data-category="blues" aria-pressed="false">블루스</button>
+      </div>
+      <div class="model-wrap">
+        <span id="model-status" role="status">임시 모델 불러오는 중</span>
+        <button type="button" id="model-retry" class="plain-button" hidden>다시 시도</button>
+      </div>
+    </section>
+
+    <div class="workspace">
+      <section class="viewer-card" aria-labelledby="viewer-heading">
+        <div id="stage" class="stage">
+          <div class="stage-top">
+            <h2 id="viewer-heading" tabindex="-1"><svg class="icon" aria-hidden="true"><use href="#icon-cube"/></svg>3D 관찰 장면</h2>
+            <span id="view-status" class="view-badge">자유 시점</span>
+          </div>
+          <canvas id="viewer" tabindex="0" aria-label="3D 관찰 장면. 방향키로 자유 회전" aria-describedby="viewer-help state-summary"></canvas>
+          <div id="scene-message" class="scene-message" role="status" hidden></div>
+          <div id="fallback" class="fallback" hidden>
+            <svg class="icon" aria-hidden="true"><use href="#icon-cube"/></svg>
+            <p id="fallback-message">3D 장면을 표시할 수 없습니다.</p>
+            <small>아래에서 연주 위치와 호흡 설명을 살펴볼 수 있어요.</small>
+            <button type="button" id="viewer-retry">3D 다시 시도</button>
+          </div>
+          <div class="stage-bottom">
+            <span id="viewer-help"><svg class="icon" aria-hidden="true"><use href="#icon-drag"/></svg>드래그 · 방향키로 회전</span>
+            <span class="stage-legend"><span></span>입술 윤곽</span>
+          </div>
+        </div>
+        <div class="view-bar">
+          <div class="view-bar-title"><svg class="icon" aria-hidden="true"><use href="#icon-view"/></svg><span>관찰 방향<small>연주자 기준 · 임시</small></span></div>
+          <div class="presets" role="group" aria-label="관찰 방향">
+            <button type="button" data-view="front" aria-pressed="false">정면</button>
+            <button type="button" data-view="back" aria-pressed="false">후면</button>
+            <button type="button" data-view="left" aria-pressed="false">왼쪽</button>
+            <button type="button" data-view="right" aria-pressed="false">오른쪽</button>
+          </div>
+        </div>
+      </section>
+
+      <aside class="sidebar" aria-label="학습 조작과 설명">
+        <section class="controls panel" aria-labelledby="controls-heading">
+          <div class="section-heading"><span class="section-number">01</span><h2 id="controls-heading">관찰 조작</h2></div>
+          <div class="field transparency-field">
+            <div class="field-title"><label for="transparency">얼굴 투명도</label><output id="transparency-value" for="transparency" aria-live="off">60%</output></div>
+            <input type="range" id="transparency" value="60" min="0" max="100" step="1" aria-valuetext="60%" aria-describedby="transparency-help">
+            <div id="transparency-help" class="range-labels"><span>0% · 불투명</span><span>100% · 얼굴 숨김</span></div>
+          </div>
+          <div class="field">
+            <label for="position">살펴볼 연주 위치</label>
+            <div class="select-wrap"><select id="position" aria-describedby="input-reason" disabled><option value="">위치를 선택하세요</option></select><svg class="icon" aria-hidden="true"><use href="#icon-chevron"/></svg></div>
+          </div>
+          <div class="field">
+            <div id="breath-heading" class="field-title">호흡 방향</div>
+            <div class="breaths" role="group" aria-labelledby="breath-heading" aria-describedby="input-reason">
+              <button type="button" id="breath-blow" aria-pressed="false" disabled><svg class="icon" aria-hidden="true"><use href="#icon-breath"/></svg><span><strong>날숨</strong><small>불기</small></span></button>
+              <button type="button" id="breath-draw" aria-pressed="false" disabled><svg class="icon" aria-hidden="true"><use href="#icon-breath"/></svg><span><strong>들숨</strong><small>들이마시기</small></span></button>
+            </div>
+            <p id="input-reason" class="field-hint">연주 위치를 먼저 선택하세요.</p>
+          </div>
+        </section>
+        <section class="learning panel" aria-labelledby="learning-heading">
+          <div class="section-heading"><span class="section-number">02</span><h2 id="learning-heading">연주 설명</h2></div>
+          <div class="learning-position" id="learning-position">살펴볼 위치를 선택하세요.</div>
+          <p id="learning-breath">입술 윤곽과 취구가 만나는 곳을 관찰해 보세요.</p>
+          <div class="result"><svg class="icon" aria-hidden="true"><use href="#icon-note"/></svg><div><span id="note-label">음 정보 · 검증 대기</span><p id="learning-result">실제 모델의 규격과 음 배열 확인이 필요합니다.</p></div></div>
+        </section>
+      </aside>
+    </div>
+    <p id="state-summary" class="sr-only"></p>
+    <p id="learning-live" class="sr-only" role="status"></p>
+
+    <details id="guide" class="guide">
+      <summary><svg class="icon" aria-hidden="true"><use href="#icon-info"/></svg>관찰 기준과 자료 안내<svg class="icon chevron" aria-hidden="true"><use href="#icon-chevron"/></svg></summary>
+      <div class="guide-content">
+        <div><h3>임시 방향 기준 · 연주자 기준</h3><p>정면은 연주자의 앞, 후면은 뒤에서 바라봅니다. 왼쪽과 오른쪽은 연주자의 좌우입니다. 자유 회전은 연주 위치를 바꾸지 않습니다.</p></div>
+        <div><h3>접촉 위치와 음 정보</h3><p>화면에서 위치를 고르는 것은 관찰을 위한 조작입니다. 실제로는 취구에 입술을 대고 숨을 내쉬거나 들이마십니다. 예시 취구 배열은 실제 제품의 구멍 번호나 규격을 뜻하지 않습니다.</p></div>
+        <div><h3>참고 자료</h3><p>Drive 자료의 입술 선과 정면·측면 접촉 구도를 참고해 3D 형상을 제작했습니다. 임시 형상이며 실제 조성, 음 배열, 계이름 표기는 검증이 필요합니다.</p></div>
+      </div>
+    </details>
+  </main>
+</body>
+</html>

@@ -1,0 +1,62 @@
+{
+  "id": "compact-study",
+  "title": "다이아토닉 형상 시제품",
+  "family": "diatonic",
+  "fixture": true,
+  "manufacturer": null,
+  "product": null,
+  "key": null,
+  "tuning": null,
+  "geometry": {
+    "width": 6.35,
+    "height": 0.88,
+    "depth": 1.55,
+    "mouthpieceZ": 0,
+    "hasSlide": false,
+    "cover": "rounded",
+    "unit": "scene"
+  },
+  "holes": [
+    {"id": "hole-a", "x": -2.55, "y": 0, "width": 0.54, "height": 0.42, "shape": "rect"},
+    {"id": "hole-b", "x": -1.7, "y": 0, "width": 0.54, "height": 0.42, "shape": "rect"},
+    {"id": "hole-c", "x": -0.85, "y": 0, "width": 0.54, "height": 0.42, "shape": "rect"},
+    {"id": "hole-d", "x": 0.0, "y": 0, "width": 0.54, "height": 0.42, "shape": "rect"},
+    {"id": "hole-e", "x": 0.85, "y": 0, "width": 0.54, "height": 0.42, "shape": "rect"},
+    {"id": "hole-f", "x": 1.7, "y": 0, "width": 0.54, "height": 0.42, "shape": "rect"},
+    {"id": "hole-g", "x": 2.55, "y": 0, "width": 0.54, "height": 0.42, "shape": "rect"}
+  ],
+  "positions": [
+    {"id": "demo-a", "label": "관찰 위치 A", "physicalHoleIds": ["hole-a"], "contact": [-2.55, 0, 0]},
+    {"id": "demo-b", "label": "관찰 위치 B", "physicalHoleIds": ["hole-b"], "contact": [-1.7, 0, 0]},
+    {"id": "demo-c", "label": "관찰 위치 C", "physicalHoleIds": ["hole-c"], "contact": [-0.85, 0, 0]},
+    {"id": "demo-d", "label": "관찰 위치 D", "physicalHoleIds": ["hole-d"], "contact": [0.0, 0, 0]},
+    {"id": "demo-e", "label": "관찰 위치 E", "physicalHoleIds": ["hole-e"], "contact": [0.85, 0, 0]},
+    {"id": "demo-f", "label": "관찰 위치 F", "physicalHoleIds": ["hole-f"], "contact": [1.7, 0, 0]},
+    {"id": "demo-g", "label": "관찰 위치 G", "physicalHoleIds": ["hole-g"], "contact": [2.55, 0, 0]}
+  ],
+  "orientation": {
+    "up": [
+      0,
+      1,
+      0
+    ],
+    "mouthpieceNormal": [
+      0,
+      0,
+      1
+    ],
+    "viewConvention": "player",
+    "numberingRule": null
+  },
+  "mechanisms": [],
+  "noteMappings": [],
+  "verification": {
+    "geometry": "provisional",
+    "noteMapping": "unspecified",
+    "notation": "unspecified",
+    "contactModel": "provisional"
+  },
+  "verificationEvidence": {},
+  "evidence": [],
+  "defaultPositionId": "demo-d"
+}
