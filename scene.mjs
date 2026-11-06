@@ -65,15 +65,14 @@ function cameraMatrices({ eye, target, up, fov }, aspect) {
 const hex = value => [16, 8, 0].map(shift => ((value >> shift) & 255) / 255);
 const material = (color, metal = 0) => ({ color: hex(color), metal });
 const styles = {
-  head: material(0x8ca9c3, 0.18),
-  ear: material(0x91a9c1, 0.09),
-  detail: material(0x4b6480),
-  eye: material(0x40536b),
-  skinEdge: material(0xa4bbd0, 0.12),
-  lipUpper: material(0xb94f46, 0.15),
-  lipLower: material(0xd66352, 0.18),
-  lipLine: material(0xff977c, 0.12),
-  lipLineInner: material(0xffc2a9, 0.13),
+  head: material(0x98afc4, 0.04),
+  ear: material(0x98aec2, 0.04),
+  detail: material(0x59738c),
+  eye: material(0x4a6077),
+  skinEdge: material(0x9fb6c9, 0.04),
+  lipUpper: material(0xbb6263, 0.04),
+  lipLower: material(0xc56f6e, 0.07),
+  lipContact: material(0xf09c8d, 0.05),
   dark: material(0x132033, 0.18),
   well: material(0x27394e, 0.21),
   steel: material(0x9eb4cc, 0.76),
@@ -183,20 +182,33 @@ function tube(mesh, sample, thickness, segments = 36, sides = 8) {
 const HEAD_CENTER_Y = 1.14;
 const HEAD_RADIUS_Y = 1.99;
 const gaussian = (x, y, cx, cy, sx, sy) => Math.exp(-(((x - cx) / sx) ** 2 + ((y - cy) / sy) ** 2));
-const jawWidth = y => 1.41 * (1 - 0.24 * gaussian(0, y, 0, -0.51, 1, 0.69) +
-  0.07 * gaussian(0, y, 0, 0.93, 1, 0.54));
+const smooth = value => {
+  const t = clamp(value, 0, 1);
+  return t * t * (3 - 2 * t);
+};
+const jawWidth = y => 1.41 * (1 - 0.16 * gaussian(0, y, 0, -0.48, 1, 0.59) +
+  0.08 * gaussian(0, y, 0, 0.94, 1, 0.48) + 0.07 * gaussian(0, y, 0, 1.98, 1, 0.59));
 
 function faceDepth(x, y, base, frontWeight) {
-  const nose = 0.51 * gaussian(x, y, 0, 0.84, 0.27, 0.33) + 0.22 * gaussian(x, y, 0, 1.17, 0.22, 0.60);
-  const cheeks = 0.13 * gaussian(Math.abs(x), y, 0.77, 0.72, 0.41, 0.44);
-  const eyes = 0.12 * gaussian(Math.abs(x), y, 0.54, 1.46, 0.39, 0.20);
-  const mouth = 0.42 * gaussian(x, y, 0, 0.04, 0.64, 0.56) -
-    0.20 * gaussian(x, y, 0, 0.06, 0.43, 0.16);
-  const chin = 0.64 * gaussian(x, y, 0, -0.59, 0.63, 0.37);
-  const z = base - (nose + cheeks - eyes + mouth + chin) * frontWeight;
-  const clearance = 0.105 + 0.09 * clamp(Math.abs(x) / 0.56, 0, 1);
-  const noseBlend = clamp((y - 0.54) / 0.23, 0, 1);
-  return z + Math.max(0, clearance - z) * (1 - noseBlend);
+  const s = Math.abs(x);
+  const bridge = 0.34 * gaussian(x, y, 0, 1.16, 0.18, 0.53);
+  const noseTip = 0.55 * gaussian(x, y, 0, 0.83, 0.21, 0.22);
+  const ala = 0.23 * gaussian(s, y, 0.23, 0.76, 0.125, 0.145);
+  const brow = 0.11 * gaussian(s, y, 0.55, 1.67, 0.42, 0.19);
+  const socket = 0.135 * gaussian(s, y, 0.56, 1.44, 0.37, 0.18);
+  const cheekbone = 0.21 * gaussian(s, y, 0.87, 1.00, 0.45, 0.36);
+  const cheek = 0.075 * gaussian(s, y, 0.68, 0.56, 0.41, 0.31);
+  const muzzle = 0.38 * gaussian(x, y, 0, 0.21, 0.58, 0.43);
+  const lipSupport = 0.24 * gaussian(s, y, 0.35, -0.16, 0.21, 0.31);
+  const philtrum = 0.057 * gaussian(x, y, 0, 0.56, 0.10, 0.13);
+  const mouth = 0.21 * gaussian(x, y, 0, 0.01, 0.31, 0.17);
+  const chin = 0.60 * gaussian(x, y, 0, -0.58, 0.61, 0.31);
+  const jaw = 0.085 * gaussian(s, y, 0.81, -0.12, 0.31, 0.37);
+  const relief = bridge + noseTip + ala + brow - socket + cheekbone + cheek + muzzle + lipSupport -
+    philtrum - mouth + chin + jaw;
+  const z = base - relief * frontWeight;
+  const clearance = 0.105 + 0.085 * smooth(s / 0.56);
+  return z + Math.max(0, clearance - z) * (1 - smooth((y - 0.55) / 0.22));
 }
 
 function faceZ(x, y) {
@@ -209,9 +221,9 @@ function faceZ(x, y) {
 function details() {
   const head = [];
   const ears = [];
-  const detail = [];
-  const eyes = [];
-  const rims = [];
+  const creases = [];
+  const lids = [];
+  const cartilage = [];
 
   function face(u, v) {
     const yaw = u * TAU;
@@ -222,60 +234,75 @@ function details() {
     const z = 1.45 + 1.18 * c * Math.cos(yaw);
     return [x, y, faceDepth(x, y, z, Math.max(0, -Math.cos(yaw)) ** 2)];
   }
-  surfaceWithNormals(head, 78, 72, face);
+  surfaceWithNormals(head, 100, 88, face);
 
   for (const side of [-1, 1]) {
-    ellipsoid(ears, [1.33 * side, 0.95, 1.52], [0.27, 0.42, 0.19], side * 0.38);
-    const earArc = u => {
-      const angle = (0.09 + 0.84 * u) * TAU;
-      return [side * (1.43 + 0.085 * Math.sin(angle)), 0.96 + 0.24 * Math.cos(angle), 1.347];
+    // The helix and antihelix follow the outward-facing surface of each ear.
+    const earCenter = [1.36 * side, 0.98, 1.54];
+    ellipsoid(ears, earCenter, [0.225, 0.41, 0.245]);
+    const earSurface = (y, z, lift) => {
+      const depth = 0.225 * Math.sqrt(Math.max(0, 1 - (y / 0.41) ** 2 - (z / 0.245) ** 2));
+      return [earCenter[0] + side * (depth + lift), earCenter[1] + y, earCenter[2] + z];
     };
-    tube(rims, earArc, 0.017, 24);
+    tube(cartilage, u => {
+      const angle = (0.08 + 0.79 * u) * TAU;
+      return earSurface(0.345 * Math.cos(angle), 0.182 * Math.sin(angle), 0.008);
+    }, 0.022, 30);
+    tube(creases, u => earSurface(-0.15 + 0.38 * u, 0.025 + 0.062 * Math.sin(PI * u), 0.007), 0.013, 19);
 
-    const eye = u => {
-      const x = side * (0.26 + u * 0.59);
-      const y = 1.42 + 0.075 * Math.sin(PI * u) + 0.042 * u;
-      return [x, y, faceZ(x, y) - 0.023];
+    const lid = u => {
+      const x = side * (0.25 + u * 0.62);
+      const y = 1.415 + 0.084 * Math.sin(PI * u) + 0.015 * u;
+      return [x, y, faceZ(x, y) - 0.010];
     };
-    tube(eyes, eye, 0.020, 26);
+    tube(lids, lid, 0.014, 28);
+    tube(cartilage, u => {
+      const [x, y] = lid(0.08 + u * 0.84);
+      const creaseY = y + 0.067 * Math.sin(PI * u);
+      return [x, creaseY, faceZ(x, creaseY) - 0.011];
+    }, 0.011, 24);
 
     const brow = u => {
-      const x = side * (0.28 + u * 0.59);
-      const y = 1.69 + 0.11 * Math.sin(PI * u) + 0.015 * u;
-      return [x, y, faceZ(x, y) - 0.021];
-    };
-    tube(detail, brow, 0.028, 26);
-
-    const noseEdge = u => {
-      const x = side * (0.11 + 0.19 * u);
-      const y = 0.75 + 0.07 * Math.sin(u * PI * 0.75);
+      const x = side * (0.26 + u * 0.65);
+      const y = 1.673 + 0.113 * Math.sin(PI * u) + 0.016 * u;
       return [x, y, faceZ(x, y) - 0.016];
     };
-    tube(detail, noseEdge, 0.017, 22);
+    tube(creases, brow, 0.017, 30);
+
+    const nostril = u => {
+      const x = side * (0.095 + 0.20 * u);
+      const y = 0.71 + 0.043 * Math.sin(PI * u) + 0.017 * u;
+      return [x, y, faceZ(x, y) - 0.008];
+    };
+    tube(creases, nostril, 0.015, 22);
   }
 
-  return [[head, styles.head], [ears, styles.ear], [detail, styles.detail, 0.8],
-    [eyes, styles.eye, 0.83], [rims, styles.skinEdge, 0.85]];
+  return [[head, styles.head], [ears, styles.ear], [creases, styles.detail, 0.72],
+    [lids, styles.eye, 0.80], [cartilage, styles.skinEdge, 0.68]];
 }
 
 function lipMeshes(height) {
   const upper = [];
   const lower = [];
-  const outline = [];
-  const innerOutline = [];
+  const contactRim = [];
+  const innerW = 0.30;
+  const outerW = 0.51;
   const innerH = height * 0.24;
-  const upperH = height * 0.73;
-  const lowerH = Math.min(height * 0.62, 0.55);
-  const outerW = 0.57;
-  const innerW = 0.32;
+  const upperH = Math.min(height * 0.68, 0.77);
+  const lowerH = Math.min(height * 0.49, 0.48);
 
   function profile(u, outer) {
     const t = u * TAU;
-    const h = Math.sin(t);
-    const x = Math.cos(t) * (outer ? outerW : innerW);
-    const cupid = h > 0 ? 0.84 + 0.22 * Math.sin(PI * Math.abs(x) / outerW) : 1.06;
-    const y = h * cupid * (outer ? (h > 0 ? upperH : lowerH) : innerH);
-    const z = outer ? faceZ(x, y) - 0.020 : 0.025 + 0.022 * (x / innerW) ** 2;
+    const sin = Math.sin(t);
+    const cos = Math.cos(t);
+    const x = cos * (outer ? outerW : innerW);
+    const cupid = outer && sin > 0
+      ? 1 - 0.08 * Math.exp(-((cos / 0.24) ** 2)) + 0.065 * Math.exp(-(((Math.abs(cos) - 0.34) / 0.20) ** 2))
+      : 1;
+    const y = outer
+      ? sin * cupid * (sin > 0 ? upperH : lowerH) + 0.032 * cos ** 4
+      : sin * innerH * (sin > 0 ? 0.97 : 1.03);
+    const z = outer ? Math.max(0.031, faceZ(x, y) - 0.017) : 0.028 + 0.032 * cos ** 2;
     return [x, y, z];
   }
 
@@ -283,15 +310,16 @@ function lipMeshes(height) {
     const a = profile(u, false);
     const b = profile(u, true);
     const p = a.map((n, i) => n * (1 - v) + b[i] * v);
-    p[2] -= 0.085 * Math.sin(PI * v);
+    const lobe = Math.abs(Math.sin(TAU * u)) ** 0.65;
+    p[2] = Math.max(0.026, p[2] - (u < 0.5 ? 0.048 : 0.075) * lobe * Math.sin(PI * v));
     return p;
   }
-  surfaceWithNormals(upper, 38, 10, (u, v) => patch(u / 2, v));
-  surfaceWithNormals(lower, 38, 10, (u, v) => patch((1 + u) / 2, v));
-  tube(outline, u => profile(u, true), 0.031, 72);
-  tube(innerOutline, u => profile(u, false), 0.024, 64);
-  return [[upper, styles.lipUpper, 1, false], [lower, styles.lipLower, 1, false], [outline, styles.lipLine, 1, false],
-    [innerOutline, styles.lipLineInner, 1, false]];
+
+  surfaceWithNormals(upper, 48, 14, (u, v) => patch(u / 2, v));
+  surfaceWithNormals(lower, 48, 14, (u, v) => patch((1 + u) / 2, v));
+  tube(contactRim, u => profile(u, false), 0.013, 72);
+  return [[upper, styles.lipUpper, 1, false], [lower, styles.lipLower, 1, false],
+    [contactRim, styles.lipContact, 1, false]];
 }
 
 function strip(mesh, left, right, bottom, top, z) {
