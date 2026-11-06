@@ -33,10 +33,4 @@ python3 tests/browser_qa.py
 
 기본 결과 폴더는 `qa-output/`입니다. Chromium 실행 경로는 `HA_CHROMIUM`으로 지정할 수 있습니다.
 
-## 개발 기록
-
-- [원자료와 악기 검증 기록](docs/source-audit.md)
-- [구현 범위와 시험 결과](docs/verification.md)
-- 장면 캡처는 `docs/evidence/`에 있습니다.
-
 배포 상태는 로컬 실행용입니다.
